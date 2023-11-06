@@ -23,6 +23,7 @@ import 'package:obtainium/main.dart';
 import 'package:obtainium/providers/logs_provider.dart';
 import 'package:obtainium/providers/notifications_provider.dart';
 import 'package:obtainium/providers/settings_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
@@ -491,8 +492,16 @@ class AppsProvider with ChangeNotifier {
       await saveApps([apps[file.appId]!.app],
           attemptToCorrectInstallStatus: false);
     }
-    int? code =
-        await AndroidPackageInstaller.installApk(apkFilePath: file.file.path);
+    // int? code =
+    //     await AndroidPackageInstaller.installApk(apkFilePath: file.file.path);
+    var finalPath = file.file.path;
+    OpenResult result = await OpenFile.open(finalPath);
+    int? code;
+    if (result.type == ResultType.done) {
+      code = 0;
+    } else {
+      code = 1;
+    }
     bool installed = false;
     if (code != null && code != 0 && code != 3) {
       throw InstallError(code);
