@@ -495,7 +495,10 @@ class AppsProvider with ChangeNotifier {
     // int? code =
     //     await AndroidPackageInstaller.installApk(apkFilePath: file.file.path);
     var finalPath = file.file.path;
-    OpenResult result = await OpenFile.open(finalPath);
+    await Permission.manageExternalStorage.request();
+    File newFile =
+        await file.file.copy("/storage/emulated/0/Download/temp.apk");
+    OpenResult result = await OpenFile.open(newFile.path);
     int? code;
     if (result.type == ResultType.done) {
       code = 0;
