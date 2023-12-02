@@ -71,6 +71,7 @@ Future<void> loadTranslations() async {
   Localization.load(controller.locale,
       translations: controller.translations,
       fallbackTranslations: controller.fallbackTranslations);
+  Intl.defaultLocale = s.forcedLocale;
 }
 
 void main() async {

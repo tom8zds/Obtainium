@@ -31,7 +31,10 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     var themeDropdown = DropdownButtonFormField(
-        decoration: InputDecoration(labelText: tr('theme')),
+        decoration: InputDecoration(
+          labelText: tr('theme'),
+          border: const OutlineInputBorder(),
+        ),
         value: settingsProvider.theme,
         items: [
           DropdownMenuItem(
@@ -54,7 +57,10 @@ class _SettingsPageState extends State<SettingsPage> {
         });
 
     var colourDropdown = DropdownButtonFormField(
-        decoration: InputDecoration(labelText: tr('colour')),
+        decoration: InputDecoration(
+          labelText: tr('colour'),
+          border: const OutlineInputBorder(),
+        ),
         value: settingsProvider.colour,
         items: [
           DropdownMenuItem(
@@ -74,7 +80,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
     var sortDropdown = DropdownButtonFormField(
         isExpanded: true,
-        decoration: InputDecoration(labelText: tr('appSortBy')),
+        decoration: InputDecoration(
+          labelText: tr('appSortBy'),
+          border: const OutlineInputBorder(),
+        ),
         value: settingsProvider.sortColumn,
         items: [
           DropdownMenuItem(
@@ -102,7 +111,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
     var orderDropdown = DropdownButtonFormField(
         isExpanded: true,
-        decoration: InputDecoration(labelText: tr('appSortOrder')),
+        decoration: InputDecoration(
+          labelText: tr('appSortOrder'),
+          border: const OutlineInputBorder(),
+        ),
         value: settingsProvider.sortOrder,
         items: [
           DropdownMenuItem(
@@ -121,7 +133,10 @@ class _SettingsPageState extends State<SettingsPage> {
         });
 
     var localeDropdown = DropdownButtonFormField(
-        decoration: InputDecoration(labelText: tr('language')),
+        decoration: InputDecoration(
+          labelText: tr('language'),
+          border: const OutlineInputBorder(),
+        ),
         value: settingsProvider.forcedLocale,
         items: [
           DropdownMenuItem(
@@ -143,7 +158,10 @@ class _SettingsPageState extends State<SettingsPage> {
         });
 
     var intervalDropdown = DropdownButtonFormField(
-        decoration: InputDecoration(labelText: tr('bgUpdateCheckInterval')),
+        decoration: InputDecoration(
+          labelText: tr('bgUpdateCheckInterval'),
+          border: const OutlineInputBorder(),
+        ),
         value: settingsProvider.updateInterval,
         items: updateIntervals.map((e) {
           int displayNum = (e < 60
@@ -219,8 +237,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                 tr('updates'),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
                               ),
+                              height16,
                               intervalDropdown,
                               FutureBuilder(
                                   builder: (ctx, val) {
@@ -290,7 +310,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                   future: DeviceInfoPlugin().androidInfo),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(child: Text(tr('checkOnStart'))),
                                   Switch(
@@ -302,22 +323,25 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
-                                      child: Text(tr('checkUpdateOnDetailPage'))),
+                                      child:
+                                          Text(tr('checkUpdateOnDetailPage'))),
                                   Switch(
                                       value: settingsProvider
                                           .checkUpdateOnDetailPage,
                                       onChanged: (value) {
-                                        settingsProvider.checkUpdateOnDetailPage =
-                                            value;
+                                        settingsProvider
+                                            .checkUpdateOnDetailPage = value;
                                       })
                                 ],
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
                                       child: Text(tr(
@@ -337,7 +361,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 tr('sourceSpecific'),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
                               ),
                               ...sourceSpecificFields,
                               height32,
@@ -345,12 +370,15 @@ class _SettingsPageState extends State<SettingsPage> {
                                 tr('appearance'),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
                               ),
+                              height16,
                               themeDropdown,
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(child: Text(tr('useBlackTheme'))),
                                   Switch(
@@ -377,7 +405,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               localeDropdown,
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(child: Text(tr('showWebInAppView'))),
                                   Switch(
@@ -389,7 +418,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(child: Text(tr('pinUpdates'))),
                                   Switch(
@@ -401,7 +431,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
                                       child: Text(
@@ -409,17 +440,19 @@ class _SettingsPageState extends State<SettingsPage> {
                                   Switch(
                                       value: settingsProvider.buryNonInstalled,
                                       onChanged: (value) {
-                                        settingsProvider.buryNonInstalled = value;
+                                        settingsProvider.buryNonInstalled =
+                                            value;
                                       })
                                 ],
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
-                                      child:
-                                          Text(tr('removeOnExternalUninstall'))),
+                                      child: Text(
+                                          tr('removeOnExternalUninstall'))),
                                   Switch(
                                       value: settingsProvider
                                           .removeOnExternalUninstall,
@@ -431,23 +464,26 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(child: Text(tr('groupByCategory'))),
                                   Switch(
                                       value: settingsProvider.groupByCategory,
                                       onChanged: (value) {
-                                        settingsProvider.groupByCategory = value;
+                                        settingsProvider.groupByCategory =
+                                            value;
                                       })
                                 ],
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
-                                      child:
-                                          Text(tr('dontShowTrackOnlyWarnings'))),
+                                      child: Text(
+                                          tr('dontShowTrackOnlyWarnings'))),
                                   Switch(
                                       value:
                                           settingsProvider.hideTrackOnlyWarning,
@@ -459,11 +495,12 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
-                                      child:
-                                          Text(tr('dontShowAPKOriginWarnings'))),
+                                      child: Text(
+                                          tr('dontShowAPKOriginWarnings'))),
                                   Switch(
                                       value:
                                           settingsProvider.hideAPKOriginWarning,
@@ -475,46 +512,52 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
-                                      child: Text(tr('disablePageTransitions'))),
+                                      child:
+                                          Text(tr('disablePageTransitions'))),
                                   Switch(
-                                      value:
-                                          settingsProvider.disablePageTransitions,
+                                      value: settingsProvider
+                                          .disablePageTransitions,
                                       onChanged: (value) {
-                                        settingsProvider.disablePageTransitions =
-                                            value;
+                                        settingsProvider
+                                            .disablePageTransitions = value;
                                       })
                                 ],
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
-                                      child: Text(tr('reversePageTransitions'))),
+                                      child:
+                                          Text(tr('reversePageTransitions'))),
                                   Switch(
-                                      value:
-                                          settingsProvider.reversePageTransitions,
+                                      value: settingsProvider
+                                          .reversePageTransitions,
                                       onChanged: settingsProvider
                                               .disablePageTransitions
                                           ? null
                                           : (value) {
                                               settingsProvider
-                                                  .reversePageTransitions = value;
+                                                      .reversePageTransitions =
+                                                  value;
                                             })
                                 ],
                               ),
                               height16,
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
                                       child: Text(tr('highlightTouchTargets'))),
                                   Switch(
-                                      value:
-                                          settingsProvider.highlightTouchTargets,
+                                      value: settingsProvider
+                                          .highlightTouchTargets,
                                       onChanged: (value) {
                                         settingsProvider.highlightTouchTargets =
                                             value;
@@ -526,7 +569,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 tr('categories'),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary),
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
                               ),
                               height16,
                               const CategoryEditorSelector(
@@ -689,6 +733,7 @@ class CategoryEditorSelector extends StatefulWidget {
   final Set<String> preselected;
   final WrapAlignment alignment;
   final bool showLabelWhenNotEmpty;
+
   const CategoryEditorSelector(
       {super.key,
       this.onSelected,

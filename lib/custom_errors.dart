@@ -10,7 +10,9 @@ import 'package:provider/provider.dart';
 class ObtainiumError {
   late String message;
   bool unexpected;
+
   ObtainiumError(this.message, {this.unexpected = false});
+
   @override
   String toString() {
     return message;
@@ -19,6 +21,7 @@ class ObtainiumError {
 
 class RateLimitError extends ObtainiumError {
   late int remainingMinutes;
+
   RateLimitError(this.remainingMinutes)
       : super(plural('tooManyRequestsTryAgainInMinutes', remainingMinutes));
 }
@@ -106,7 +109,15 @@ showMessage(dynamic e, BuildContext context, {bool isError = false}) {
       .add(e.toString(), level: isError ? LogLevels.error : LogLevels.info);
   if (e is String || (e is ObtainiumError && !e.unexpected)) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.toString())),
+      SnackBar(
+        content: Text(e.toString()),
+        action: SnackBarAction(
+          label: tr("cancel"),
+          onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
+          },
+        ),
+      ),
     );
   } else {
     showDialog(

@@ -67,6 +67,7 @@ dependencies:
   connectivity_plus: ^5.0.0
   shared_storage: ^0.8.0
   open_file: ^3.3.2
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:

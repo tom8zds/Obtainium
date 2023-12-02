@@ -326,5 +326,6 @@
     "xAndNMoreUpdatesPossiblyInstalled": {
         "one": "{} 和另外 1 个应用已尝试更新。",
         "other": "{} 和另外 {} 个应用已尝试更新。"
-    }
+    },
+    "Aptoide": "Aptoide"
 }

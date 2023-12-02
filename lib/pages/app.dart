@@ -9,9 +9,9 @@ import 'package:obtainium/pages/settings.dart';
 import 'package:obtainium/providers/apps_provider.dart';
 import 'package:obtainium/providers/settings_provider.dart';
 import 'package:obtainium/providers/source_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:provider/provider.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({super.key, required this.appId});
@@ -66,45 +66,128 @@ class _AppPageState extends State<AppPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GestureDetector(
-                onTap: () {
-                  if (app?.app.url != null) {
-                    launchUrlString(app?.app.url ?? '',
-                        mode: LaunchMode.externalApplication);
-                  }
-                },
-                onLongPress: () {
-                  Clipboard.setData(ClipboardData(text: app?.app.url ?? ''));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(tr('copiedToClipboard')),
-                  ));
-                },
-                child: Text(
-                  app?.app.url ?? '',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 12),
-                )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Icon(Icons.android),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Icon(Icons.access_time),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Icon(Icons.link),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: 8,
+                ),
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 32,
+                      child: Center(
+                        child: Text(
+                          app?.app.id ?? '',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 32,
+                      child: Center(
+                        child: Text(
+                          app!.app.releaseDate == null
+                              ? tr('unknown')
+                              : DateFormat.yMMMd()
+                                  .add_Hms()
+                                  .format(app.app.releaseDate!),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 32,
+                      child: Center(
+                        child: GestureDetector(
+                            onTap: () {
+                              launchUrlString(app.app.url ?? '',
+                                  mode: LaunchMode.externalApplication);
+                            },
+                            onLongPress: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: app.app.url ?? ''));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(tr('copiedToClipboard')),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              app.app.url ?? '',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12),
+                            )),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             const SizedBox(
               height: 32,
             ),
             Column(
               children: [
+                Row(
+                  children: [
+                    Expanded(child: SizedBox()),
+                    Text(
+                      tr('latestVersionX',
+                          args: [app.app.latestVersion ?? tr('unknown')]),
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context).textTheme.bodyLarge!,
+                    ),
+                    Expanded(
+                        child: Row(
+                      children: [
+                        SizedBox(
+                          width: 8,
+                        ),
+                        if (app.app.latestVersion != app.app.installedVersion)
+                          Badge(
+                            label: Text("new"),
+                          ),
+                      ],
+                    )),
+                  ],
+                ),
                 Text(
-                  '${tr('latestVersionX', args: [
-                        app?.app.latestVersion ?? tr('unknown')
-                      ])}\n${tr('installedVersionX', args: [
-                        app?.app.installedVersion ?? tr('none')
-                      ])}${installedVersionIsEstimate ? '\n${tr('estimateInBrackets')}' : ''}',
+                  tr('installedVersionX',
+                      args: [app.app.installedVersion ?? tr('none')]),
                   textAlign: TextAlign.end,
                   style: Theme.of(context).textTheme.bodyLarge!,
                 ),
+                if (installedVersionIsEstimate)
+                  Text(
+                    tr('estimateInBrackets'),
+                    textAlign: TextAlign.end,
+                    style: Theme.of(context).textTheme.bodyLarge!,
+                  ),
               ],
             ),
-            if (app?.app.installedVersion != null &&
-                !isVersionDetectionStandard)
+            if (app.app.installedVersion != null && !isVersionDetectionStandard)
               Column(
                 children: [
                   const SizedBox(
@@ -124,9 +207,11 @@ class _AppPageState extends State<AppPage> {
             ),
             Text(
               tr('lastUpdateCheckX', args: [
-                app?.app.lastUpdateCheck == null
+                app.app.lastUpdateCheck == null
                     ? tr('never')
-                    : '\n${app?.app.lastUpdateCheck?.toLocal()}'
+                    : DateFormat.yMMMd()
+                        .add_Hms()
+                        .format(app.app.lastUpdateCheck!)
               ]),
               textAlign: TextAlign.center,
               style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
@@ -136,14 +221,12 @@ class _AppPageState extends State<AppPage> {
             ),
             CategoryEditorSelector(
                 alignment: WrapAlignment.center,
-                preselected: app?.app.categories != null
+                preselected: app.app.categories != null
                     ? app!.app.categories.toSet()
                     : {},
                 onSelected: (categories) {
-                  if (app != null) {
-                    app.app.categories = categories;
-                    appsProvider.saveApps([app.app]);
-                  }
+                  app.app.categories = categories;
+                  appsProvider.saveApps([app.app]);
                 }),
           ],
         );
@@ -178,21 +261,6 @@ class _AppPageState extends State<AppPage> {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            const SizedBox(
-              height: 8,
-            ),
-            Text(
-              app?.app.id ?? '',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            app?.app.releaseDate == null
-                ? const SizedBox.shrink()
-                : Text(
-                    app!.app.releaseDate.toString(),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
             const SizedBox(
               height: 32,
             ),
@@ -357,117 +425,127 @@ class _AppPageState extends State<AppPage> {
                 }
               }
             : null,
-        child: Text(app?.app.installedVersion == null
-            ? !trackOnly
-                ? tr('install')
-                : tr('markInstalled')
-            : !trackOnly
-                ? tr('update')
-                : tr('markUpdated')));
-
-    getBottomSheetMenu() => Padding(
-        padding:
-            EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      if (app?.app.installedVersion != null &&
-                          app?.app.installedVersion != app?.app.latestVersion &&
-                          !isVersionDetectionStandard &&
-                          !trackOnly)
-                        IconButton(
-                            onPressed: app?.downloadProgress != null
-                                ? null
-                                : showMarkUpdatedDialog,
-                            tooltip: tr('markUpdated'),
-                            icon: const Icon(Icons.done)),
-                      if (source != null &&
-                          source.combinedAppSpecificSettingFormItems.isNotEmpty)
-                        IconButton(
-                            onPressed: app?.downloadProgress != null
-                                ? null
-                                : () async {
-                                    var values =
-                                        await showAdditionalOptionsDialog();
-                                    handleAdditionalOptionChanges(values);
-                                  },
-                            tooltip: tr('additionalOptions'),
-                            icon: const Icon(Icons.edit)),
-                      if (app != null && app.installedInfo != null)
-                        IconButton(
-                          onPressed: () {
-                            appsProvider.openAppSettings(app.app.id);
-                          },
-                          icon: const Icon(Icons.settings),
-                          tooltip: tr('settings'),
-                        ),
-                      if (app != null && settingsProvider.showAppWebpage)
-                        IconButton(
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext ctx) {
-                                    return AlertDialog(
-                                      scrollable: true,
-                                      content: getInfoColumn(),
-                                      title: Text(
-                                          '${app.name} ${tr('byX', args: [
-                                            app.app.author
-                                          ])}'),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text(tr('continue')))
-                                      ],
-                                    );
-                                  });
-                            },
-                            icon: const Icon(Icons.more_horiz),
-                            tooltip: tr('more')),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                          child: (!isVersionDetectionStandard || trackOnly) &&
-                                  app?.app.installedVersion != null &&
-                                  app?.app.installedVersion ==
-                                      app?.app.latestVersion
-                              ? getResetInstallStatusButton()
-                              : getInstallOrUpdateButton()),
-                      const SizedBox(width: 16.0),
-                      IconButton(
-                        onPressed: app?.downloadProgress != null
-                            ? null
-                            : () {
-                                appsProvider
-                                    .removeAppsWithModal(
-                                        context, app != null ? [app.app] : [])
-                                    .then((value) {
-                                  if (value == true) {
-                                    Navigator.of(context).pop();
-                                  }
-                                });
-                              },
-                        tooltip: tr('remove'),
-                        icon: const Icon(Icons.delete_outline),
-                      ),
-                    ])),
-            if (app?.downloadProgress != null)
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                  child: LinearProgressIndicator(
-                      value: app!.downloadProgress! >= 0
-                          ? app.downloadProgress! / 100
-                          : null))
-          ],
+        child: Text(
+          app?.downloadProgress != null
+              ? tr('downloadingX', args: [" ${app!.downloadProgress! / 100} %"])
+              : app?.app.installedVersion == null
+                  ? !trackOnly
+                      ? tr('install')
+                      : tr('markInstalled')
+                  : !trackOnly
+                      ? tr('update')
+                      : tr('markUpdated'),
         ));
 
+    getBottomSheetMenu() => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            if (app?.app.installedVersion != null &&
+                app?.app.installedVersion != app?.app.latestVersion &&
+                !isVersionDetectionStandard &&
+                !trackOnly)
+              IconButton(
+                  onPressed: app?.downloadProgress != null
+                      ? null
+                      : showMarkUpdatedDialog,
+                  tooltip: tr('markUpdated'),
+                  icon: const Icon(Icons.done)),
+            if (source != null &&
+                source.combinedAppSpecificSettingFormItems.isNotEmpty)
+              IconButton(
+                  onPressed: app?.downloadProgress != null
+                      ? null
+                      : () async {
+                          var values = await showAdditionalOptionsDialog();
+                          handleAdditionalOptionChanges(values);
+                        },
+                  tooltip: tr('additionalOptions'),
+                  icon: const Icon(Icons.edit)),
+            if (app != null && app.installedInfo != null)
+              IconButton(
+                onPressed: () {
+                  appsProvider.openAppSettings(app.app.id);
+                },
+                icon: const Icon(Icons.settings),
+                tooltip: tr('settings'),
+              ),
+            if (app != null && settingsProvider.showAppWebpage)
+              IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext ctx) {
+                          return AlertDialog(
+                            scrollable: true,
+                            content: getInfoColumn(),
+                            title: Text('${app.name} ${tr('byX', args: [
+                                  app.app.author
+                                ])}'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text(tr('continue')))
+                            ],
+                          );
+                        });
+                  },
+                  icon: const Icon(Icons.more_horiz),
+                  tooltip: tr('more')),
+            const SizedBox(width: 16.0),
+            Expanded(
+                child: (!isVersionDetectionStandard || trackOnly) &&
+                        app?.app.installedVersion != null &&
+                        app?.app.installedVersion == app?.app.latestVersion
+                    ? getResetInstallStatusButton()
+                    : Stack(
+                        children: [
+                          if (app?.downloadProgress != null)
+                            SizedBox(
+                              height: 48,
+                              child: Center(
+                                child: SizedBox(
+                                  height: 40,
+                                  child: LinearProgressIndicator(
+                                    minHeight: 40,
+                                    borderRadius: BorderRadius.circular(20),
+                                    value: app!.downloadProgress! >= 0
+                                        ? app.downloadProgress! / 100
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          Row(
+                            children: [
+                              Expanded(child: getInstallOrUpdateButton()),
+                            ],
+                          ),
+                        ],
+                      )),
+            const SizedBox(width: 16.0),
+            IconButton(
+              onPressed: app?.downloadProgress != null
+                  ? null
+                  : () {
+                      appsProvider
+                          .removeAppsWithModal(
+                              context, app != null ? [app.app] : [])
+                          .then((value) {
+                        if (value == true) {
+                          Navigator.of(context).pop();
+                        }
+                      });
+                    },
+              tooltip: tr('remove'),
+              icon: const Icon(Icons.delete_outline),
+            ),
+          ],
+        );
+
     appScreenAppBar() => AppBar(
+          title: Text(app?.app.name ?? ""),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -477,22 +555,20 @@ class _AppPageState extends State<AppPage> {
         );
 
     return Scaffold(
-        appBar: settingsProvider.showAppWebpage ? AppBar() : appScreenAppBar(),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        body: RefreshIndicator(
-            child: settingsProvider.showAppWebpage
-                ? getAppWebView()
-                : CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                          child: Column(children: [getFullInfoColumn()])),
-                    ],
-                  ),
-            onRefresh: () async {
-              if (app != null) {
-                getUpdate(app.app.id);
-              }
-            }),
-        bottomSheet: getBottomSheetMenu());
+      appBar: settingsProvider.showAppWebpage ? AppBar() : appScreenAppBar(),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: RefreshIndicator(
+          child: settingsProvider.showAppWebpage
+              ? getAppWebView()
+              : ListView(
+                  children: [getFullInfoColumn()],
+                ),
+          onRefresh: () async {
+            if (app != null) {
+              getUpdate(app.app.id);
+            }
+          }),
+      persistentFooterButtons: [getBottomSheetMenu()],
+    );
   }
 }

@@ -326,5 +326,6 @@
     "xAndNMoreUpdatesPossiblyInstalled": {
         "one": "{} and 1 more app may have been updated.",
         "other": "{} and {} more apps may have been updated."
-    }
+    },
+    "Aptoide": "Aptoide"
 }

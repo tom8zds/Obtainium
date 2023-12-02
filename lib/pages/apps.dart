@@ -1,5 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -371,26 +370,27 @@ class AppsPageState extends State<AppsPage> {
 
     getUpdateButton(int appIndex) {
       return IconButton(
-          visualDensity: VisualDensity.compact,
-          color: Theme.of(context).colorScheme.primary,
-          tooltip:
-              listedApps[appIndex].app.additionalSettings['trackOnly'] == true
-                  ? tr('markUpdated')
-                  : tr('update'),
-          onPressed: appsProvider.areDownloadsRunning()
-              ? null
-              : () {
-                  appsProvider.downloadAndInstallLatestApps(
-                      [listedApps[appIndex].app.id],
-                      globalNavigatorKey.currentContext).catchError((e) {
-                    showError(e, context);
-                    return <String>[];
-                  });
-                },
-          icon: Icon(
-              listedApps[appIndex].app.additionalSettings['trackOnly'] == true
-                  ? Icons.check_circle_outline
-                  : Icons.install_mobile));
+        color: Theme.of(context).colorScheme.primary,
+        tooltip:
+            listedApps[appIndex].app.additionalSettings['trackOnly'] == true
+                ? tr('markUpdated')
+                : tr('update'),
+        onPressed: appsProvider.areDownloadsRunning()
+            ? null
+            : () {
+                appsProvider.downloadAndInstallLatestApps(
+                    [listedApps[appIndex].app.id],
+                    globalNavigatorKey.currentContext).catchError((e) {
+                  showError(e, context);
+                  return <String>[];
+                });
+              },
+        icon: Icon(
+          listedApps[appIndex].app.additionalSettings['trackOnly'] == true
+              ? Icons.check_circle_outline
+              : Icons.download,
+        ),
+      );
     }
 
     getAppIcon(int appIndex) {
@@ -439,58 +439,57 @@ class AppsPageState extends State<AppsPage> {
               listedApps[index].app.latestVersion;
       Widget trailingRow = Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          hasUpdate ? getUpdateButton(index) : const SizedBox.shrink(),
+          GestureDetector(
+            onTap: showChangesFn,
+            child: Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: settingsProvider.highlightTouchTargets &&
+                          showChangesFn != null
+                      ? (Theme.of(context).brightness == Brightness.light
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).primaryColorLight)
+                          .withAlpha(20)
+                      : null),
+              padding: settingsProvider.highlightTouchTargets
+                  ? const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 0)
+                  : const EdgeInsetsDirectional.fromSTEB(24, 0, 0, 0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width / 4),
+                        child: Text(getVersionText(index),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end)),
+                  ]),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        getChangesButtonString(index, showChangesFn != null),
+                        style: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            decoration: showChangesFn != null
+                                ? TextDecoration.underline
+                                : TextDecoration.none),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           hasUpdate
               ? const SizedBox(
-                  width: 10,
+                  width: 8,
                 )
               : const SizedBox.shrink(),
-          GestureDetector(
-              onTap: showChangesFn,
-              child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: settingsProvider.highlightTouchTargets &&
-                              showChangesFn != null
-                          ? (Theme.of(context).brightness == Brightness.light
-                                  ? Theme.of(context).primaryColor
-                                  : Theme.of(context).primaryColorLight)
-                              .withAlpha(20)
-                          : null),
-                  padding: settingsProvider.highlightTouchTargets
-                      ? const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 0)
-                      : const EdgeInsetsDirectional.fromSTEB(24, 0, 0, 0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-                        Container(
-                            constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width / 4),
-                            child: Text(getVersionText(index),
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.end)),
-                      ]),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            getChangesButtonString(
-                                index, showChangesFn != null),
-                            style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                decoration: showChangesFn != null
-                                    ? TextDecoration.underline
-                                    : TextDecoration.none),
-                          )
-                        ],
-                      ),
-                    ],
-                  )))
+          hasUpdate ? getUpdateButton(index) : const SizedBox.shrink(),
         ],
       );
 
@@ -539,7 +538,11 @@ class AppsPageState extends State<AppsPage> {
             onLongPress: () {
               toggleAppSelected(listedApps[index].app);
             },
-            leading: getAppIcon(index),
+            leading: Badge(
+              label: const Text("new"),
+              isLabelVisible: hasUpdate,
+              child: getAppIcon(index),
+            ),
             title: Text(
               maxLines: 1,
               listedApps[index].name,
