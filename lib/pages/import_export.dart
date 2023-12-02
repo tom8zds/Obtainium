@@ -301,14 +301,19 @@ class _ImportExportPageState extends State<ImportExportPage> {
 
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: CustomScrollView(slivers: <Widget>[
-          CustomAppBar(title: tr('importExport')),
-          SliverFillRemaining(
-              child: Padding(
+        body: Stack(
+          children: [
+            NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return [
+                  CustomAppBar(title: tr('importExport')),
+                ];
+              },
+              body: CustomScrollView(slivers: <Widget>[
+                SliverPadding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  sliver: SliverList.list(
                     children: [
                       FutureBuilder(
                         future: settingsProvider.getExportDir(),
@@ -318,29 +323,31 @@ class _ImportExportPageState extends State<ImportExportPage> {
                               Row(
                                 children: [
                                   Expanded(
-                                      child: TextButton(
-                                    style: outlineButtonStyle,
-                                    onPressed: appsProvider.apps.isEmpty ||
-                                            importInProgress
-                                        ? null
-                                        : () {
-                                            runObtainiumExport(pickOnly: true);
-                                          },
-                                    child: Text(tr('pickExportDir')),
-                                  )),
+                                    child: TextButton(
+                                      style: outlineButtonStyle,
+                                      onPressed: appsProvider.apps.isEmpty ||
+                                              importInProgress
+                                          ? null
+                                          : () {
+                                              runObtainiumExport(pickOnly: true);
+                                            },
+                                      child: Text(tr('pickExportDir')),
+                                    ),
+                                  ),
                                   const SizedBox(
                                     width: 16,
                                   ),
                                   Expanded(
-                                      child: TextButton(
-                                    style: outlineButtonStyle,
-                                    onPressed: appsProvider.apps.isEmpty ||
-                                            importInProgress ||
-                                            snapshot.data == null
-                                        ? null
-                                        : runObtainiumExport,
-                                    child: Text(tr('obtainiumExport')),
-                                  )),
+                                    child: TextButton(
+                                      style: outlineButtonStyle,
+                                      onPressed: appsProvider.apps.isEmpty ||
+                                              importInProgress ||
+                                              snapshot.data == null
+                                          ? null
+                                          : runObtainiumExport,
+                                      child: Text(tr('obtainiumExport')),
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(
@@ -378,9 +385,9 @@ class _ImportExportPageState extends State<ImportExportPage> {
                                             if (value['autoExportOnChanges'] !=
                                                 null) {
                                               settingsProvider
-                                                  .autoExportOnChanges = value[
-                                                      'autoExportOnChanges'] ==
-                                                  true;
+                                                      .autoExportOnChanges =
+                                                  value['autoExportOnChanges'] ==
+                                                      true;
                                             }
                                           }
                                         }),
@@ -416,8 +423,7 @@ class _ImportExportPageState extends State<ImportExportPage> {
                                 )),
                             const SizedBox(height: 8),
                             TextButton(
-                                onPressed:
-                                    importInProgress ? null : runUrlImport,
+                                onPressed: importInProgress ? null : runUrlImport,
                                 child: Text(
                                   tr('importFromURLsInFile'),
                                 )),
@@ -426,8 +432,7 @@ class _ImportExportPageState extends State<ImportExportPage> {
                       ...sourceProvider.sources
                           .where((element) => element.canSearch)
                           .map((source) => Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     const SizedBox(height: 8),
                                     TextButton(
@@ -442,8 +447,7 @@ class _ImportExportPageState extends State<ImportExportPage> {
                           .toList(),
                       ...sourceProvider.massUrlSources
                           .map((source) => Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     const SizedBox(height: 8),
                                     TextButton(
@@ -456,20 +460,35 @@ class _ImportExportPageState extends State<ImportExportPage> {
                                             tr('importX', args: [source.name])))
                                   ]))
                           .toList(),
-                      const Spacer(),
-                      const Divider(
-                        height: 32,
-                      ),
-                      Text(tr('importedAppsIdDisclaimer'),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              fontStyle: FontStyle.italic, fontSize: 12)),
-                      const SizedBox(
-                        height: 8,
-                      ),
                     ],
-                  )))
-        ]));
+                  ),
+                )
+              ]),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                height: kToolbarHeight,
+                child: Column(
+                  children: [
+                    const Divider(
+                      height: 2,
+                    ),
+                    const Spacer(),
+                    Text(tr('importedAppsIdDisclaimer'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontStyle: FontStyle.italic, fontSize: 12)),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ));
   }
 }
 
@@ -548,6 +567,7 @@ class UrlSelectionModal extends StatefulWidget {
 
 class _UrlSelectionModalState extends State<UrlSelectionModal> {
   Map<MapEntry<String, List<String>>, bool> urlWithDescriptionSelections = {};
+
   @override
   void initState() {
     super.initState();
