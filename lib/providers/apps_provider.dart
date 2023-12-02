@@ -9,7 +9,6 @@ import 'package:http/http.dart' as http;
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:android_intent_plus/flag.dart';
-import 'package:android_package_installer/android_package_installer.dart';
 import 'package:android_package_manager/android_package_manager.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -494,7 +493,6 @@ class AppsProvider with ChangeNotifier {
     }
     // int? code =
     //     await AndroidPackageInstaller.installApk(apkFilePath: file.file.path);
-    var finalPath = file.file.path;
     await Permission.manageExternalStorage.request();
     File newFile =
         await file.file.copy("/storage/emulated/0/Download/temp.apk");
@@ -506,7 +504,7 @@ class AppsProvider with ChangeNotifier {
       code = 1;
     }
     bool installed = false;
-    if (code != null && code != 0 && code != 3) {
+    if (code != 0 && code != 3) {
       throw InstallError(code);
     } else if (code == 0) {
       installed = true;
