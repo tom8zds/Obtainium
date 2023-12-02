@@ -69,23 +69,23 @@ class _AppPageState extends State<AppPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
+                const Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: EdgeInsets.all(4.0),
                       child: Icon(Icons.android),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: EdgeInsets.all(4.0),
                       child: Icon(Icons.access_time),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: EdgeInsets.all(4.0),
                       child: Icon(Icons.link),
                     ),
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 8,
                 ),
                 Column(
@@ -119,12 +119,12 @@ class _AppPageState extends State<AppPage> {
                       child: Center(
                         child: GestureDetector(
                             onTap: () {
-                              launchUrlString(app.app.url ?? '',
+                              launchUrlString(app.app.url,
                                   mode: LaunchMode.externalApplication);
                             },
                             onLongPress: () {
                               Clipboard.setData(
-                                  ClipboardData(text: app.app.url ?? ''));
+                                  ClipboardData(text: app.app.url));
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(tr('copiedToClipboard')),
@@ -132,7 +132,7 @@ class _AppPageState extends State<AppPage> {
                               );
                             },
                             child: Text(
-                              app.app.url ?? '',
+                              app.app.url,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   decoration: TextDecoration.underline,
@@ -152,21 +152,20 @@ class _AppPageState extends State<AppPage> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: SizedBox()),
+                    const Expanded(child: SizedBox()),
                     Text(
-                      tr('latestVersionX',
-                          args: [app.app.latestVersion ?? tr('unknown')]),
+                      tr('latestVersionX', args: [app.app.latestVersion]),
                       textAlign: TextAlign.end,
                       style: Theme.of(context).textTheme.bodyLarge!,
                     ),
                     Expanded(
                         child: Row(
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 8,
                         ),
                         if (app.app.latestVersion != app.app.installedVersion)
-                          Badge(
+                          const Badge(
                             label: Text("new"),
                           ),
                       ],
@@ -221,9 +220,7 @@ class _AppPageState extends State<AppPage> {
             ),
             CategoryEditorSelector(
                 alignment: WrapAlignment.center,
-                preselected: app.app.categories != null
-                    ? app!.app.categories.toSet()
-                    : {},
+                preselected: app.app.categories.toSet(),
                 onSelected: (categories) {
                   app.app.categories = categories;
                   appsProvider.saveApps([app.app]);
@@ -410,7 +407,7 @@ class _AppPageState extends State<AppPage> {
                   HapticFeedback.heavyImpact();
                   var res = await appsProvider.downloadAndInstallLatestApps(
                     app?.app.id != null ? [app!.app.id] : [],
-                    globalNavigatorKey.currentContext,
+                        () => globalNavigatorKey.currentContext,
                   );
                   if (app?.app.installedVersion != null && !trackOnly) {
                     // ignore: use_build_context_synchronously

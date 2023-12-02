@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:android_package_installer/android_package_installer.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,8 +56,7 @@ class DowngradeError extends ObtainiumError {
 }
 
 class InstallError extends ObtainiumError {
-  InstallError(int code)
-      : super(PackageInstallerStatus.byCode(code).name.substring(7));
+  InstallError(int code) : super(tr('someErrors'));
 }
 
 class IDChangedError extends ObtainiumError {

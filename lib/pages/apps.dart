@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:obtainium/components/custom_app_bar.dart';
 import 'package:obtainium/components/generated_form.dart';
 import 'package:obtainium/components/generated_form_modal.dart';
@@ -15,7 +16,6 @@ import 'package:obtainium/providers/source_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:markdown/markdown.dart' as md;
 
 class AppsPage extends StatefulWidget {
   const AppsPage({super.key});
@@ -380,7 +380,7 @@ class AppsPageState extends State<AppsPage> {
             : () {
                 appsProvider.downloadAndInstallLatestApps(
                     [listedApps[appIndex].app.id],
-                    globalNavigatorKey.currentContext).catchError((e) {
+                        () => globalNavigatorKey.currentContext).catchError((e) {
                   showError(e, context);
                   return <String>[];
                 });
@@ -496,14 +496,8 @@ class AppsPageState extends State<AppsPage> {
       var transparent =
           Theme.of(context).colorScheme.background.withAlpha(0).value;
       List<double> stops = [
-        ...listedApps[index]
-            .app
-            .categories
-            .asMap()
-            .entries
-            .map((e) =>
-                ((e.key / (listedApps[index].app.categories.length - 1))))
-            .toList(),
+        ...listedApps[index].app.categories.asMap().entries.map(
+            (e) => ((e.key / (listedApps[index].app.categories.length - 1)))),
         1
       ];
       if (stops.length == 2) {
@@ -516,13 +510,9 @@ class AppsPageState extends State<AppsPage> {
                   begin: const Alignment(-1, 0),
                   end: const Alignment(-0.97, 0),
                   colors: [
-                ...listedApps[index]
-                    .app
-                    .categories
-                    .map((e) =>
-                        Color(settingsProvider.categories[e] ?? transparent)
-                            .withAlpha(255))
-                    .toList(),
+                ...listedApps[index].app.categories.map((e) =>
+                    Color(settingsProvider.categories[e] ?? transparent)
+                        .withAlpha(255)),
                 Color(transparent)
               ])),
           child: ListTile(
@@ -703,7 +693,7 @@ class AppsPageState extends State<AppsPage> {
                   }
                   appsProvider
                       .downloadAndInstallLatestApps(
-                          toInstall, globalNavigatorKey.currentContext)
+                          toInstall, () => globalNavigatorKey.currentContext)
                       .catchError((e) {
                     showError(e, context);
                     return <String>[];
@@ -717,7 +707,7 @@ class AppsPageState extends State<AppsPage> {
             };
     }
 
-    launchCategorizeDialog() {
+    launchCategorizeDialog(Function(dynamic e) onError) {
       return () async {
         try {
           Set<String>? preselected;
@@ -773,7 +763,7 @@ class AppsPageState extends State<AppsPage> {
                 });
           }
         } catch (err) {
-          showError(err, context);
+          onError(err);
         }
       };
     }
@@ -827,7 +817,7 @@ class AppsPageState extends State<AppsPage> {
       Navigator.of(context).pop();
     }
 
-    resetSelectedAppsInstallStatuses() async {
+    resetSelectedAppsInstallStatuses(Function callBack) async {
       try {
         var values = await showDialog(
             context: context,
@@ -847,7 +837,7 @@ class AppsPageState extends State<AppsPage> {
           }).toList());
         }
       } finally {
-        Navigator.of(context).pop();
+        callBack();
       }
     }
 
@@ -896,7 +886,11 @@ class AppsPageState extends State<AppsPage> {
                         icon: const Icon(Icons.share),
                       ),
                       IconButton(
-                        onPressed: resetSelectedAppsInstallStatuses,
+                        onPressed: () {
+                          resetSelectedAppsInstallStatuses(() {
+                            Navigator.of(context).pop();
+                          });
+                        },
                         tooltip: tr('resetInstallStatus'),
                         icon: const Icon(Icons.restore_page_outlined),
                       ),
@@ -930,7 +924,11 @@ class AppsPageState extends State<AppsPage> {
         ),
         IconButton(
           visualDensity: VisualDensity.compact,
-          onPressed: selectedAppIds.isEmpty ? null : launchCategorizeDialog(),
+          onPressed: selectedAppIds.isEmpty
+              ? null
+              : launchCategorizeDialog((e) {
+                  showError(e, context);
+                }),
           tooltip: tr('categorize'),
           icon: const Icon(Icons.category_outlined),
         ),
@@ -985,10 +983,8 @@ class AppsPageState extends State<AppsPage> {
                       defaultValue: filter.sourceFilter,
                       [
                         MapEntry('', tr('none')),
-                        ...sourceProvider.sources
-                            .map((e) =>
-                                MapEntry(e.runtimeType.toString(), e.name))
-                            .toList()
+                        ...sourceProvider.sources.map(
+                            (e) => MapEntry(e.runtimeType.toString(), e.name))
                       ])
                 ]
               ],

@@ -5,16 +5,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:http/http.dart' as http;
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:android_package_manager/android_package_manager.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_archive/flutter_archive.dart';
+import 'package:flutter_fgbg/flutter_fgbg.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:obtainium/components/generated_form.dart';
 import 'package:obtainium/components/generated_form_modal.dart';
 import 'package:obtainium/custom_errors.dart';
@@ -22,15 +27,11 @@ import 'package:obtainium/main.dart';
 import 'package:obtainium/providers/logs_provider.dart';
 import 'package:obtainium/providers/notifications_provider.dart';
 import 'package:obtainium/providers/settings_provider.dart';
+import 'package:obtainium/providers/source_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter_fgbg/flutter_fgbg.dart';
-import 'package:obtainium/providers/source_provider.dart';
-import 'package:http/http.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:flutter_archive/flutter_archive.dart';
 import 'package:shared_storage/shared_storage.dart' as saf;
 
 final pm = AndroidPackageManager();
@@ -42,6 +43,7 @@ class AppInMemory {
   Uint8List? icon;
 
   AppInMemory(this.app, this.downloadProgress, this.installedInfo, this.icon);
+
   AppInMemory deepCopy() =>
       AppInMemory(app.deepCopy(), downloadProgress, installedInfo, icon);
 
@@ -51,6 +53,7 @@ class AppInMemory {
 class DownloadedApk {
   String appId;
   File file;
+
   DownloadedApk(this.appId, this.file);
 }
 
@@ -58,6 +61,7 @@ class DownloadedXApkDir {
   String appId;
   File file;
   Directory extracted;
+
   DownloadedXApkDir(this.appId, this.file, this.extracted);
 }
 
@@ -150,7 +154,7 @@ class AppsProvider with ChangeNotifier {
   bool isForeground = true;
   late Stream<FGBGType>? foregroundStream;
   late StreamSubscription<FGBGType>? foregroundSubscription;
-  late Directory APKDir;
+  late Directory appPackageDir;
   late SettingsProvider settingsProvider = SettingsProvider();
 
   Iterable<AppInMemory> getAppValues() => apps.values.map((a) => a.deepCopy());
@@ -166,12 +170,12 @@ class AppsProvider with ChangeNotifier {
       await settingsProvider.initializeSettings();
       var cacheDirs = await getExternalCacheDirectories();
       if (cacheDirs?.isNotEmpty ?? false) {
-        APKDir = cacheDirs!.first;
+        appPackageDir = cacheDirs!.first;
       } else {
-        APKDir =
+        appPackageDir =
             Directory('${(await getExternalStorageDirectory())!.path}/apks');
-        if (!APKDir.existsSync()) {
-          APKDir.createSync();
+        if (!appPackageDir.existsSync()) {
+          appPackageDir.createSync();
         }
       }
       if (!isBg) {
@@ -179,7 +183,8 @@ class AppsProvider with ChangeNotifier {
         await loadApps();
         // Delete any partial APKs (if safe to do so)
         var cutoff = DateTime.now().subtract(const Duration(days: 7));
-        APKDir.listSync()
+        appPackageDir
+            .listSync()
             .where((element) =>
                 element.path.endsWith('.part') ||
                 element.statSync().modified.isBefore(cutoff))
@@ -214,7 +219,7 @@ class AppsProvider with ChangeNotifier {
   Future<File> downloadFile(
       String url, String fileNameNoExt, Function? onProgress,
       {bool useExisting = true, Map<String, String>? headers}) async {
-    var destDir = APKDir.path;
+    var destDir = appPackageDir.path;
     var req = Request('GET', Uri.parse(url));
     if (headers != null) {
       req.headers.addAll(headers);
@@ -541,7 +546,8 @@ class AppsProvider with ChangeNotifier {
   }
 
   Future<MapEntry<String, String>?> confirmApkUrl(
-      App app, BuildContext? context) async {
+      App app, ValueGetter<BuildContext?> getContext) async {
+    BuildContext? context = getContext();
     // If the App has more than one APK, the user should pick one (if context provided)
     MapEntry<String, String>? apkUrl =
         app.apkUrls[app.preferredApkIndex >= 0 ? app.preferredApkIndex : 0];
@@ -591,8 +597,9 @@ class AppsProvider with ChangeNotifier {
   // If user input is needed and the App is in the background, a notification is sent to get the user's attention
   // Returns an array of Ids for Apps that were successfully downloaded, regardless of installation result
   Future<List<String>> downloadAndInstallLatestApps(
-      List<String> appIds, BuildContext? context,
+      List<String> appIds, ValueGetter<BuildContext?> getContext,
       {NotificationsProvider? notificationsProvider}) async {
+    BuildContext? context = getContext();
     notificationsProvider =
         notificationsProvider ?? context?.read<NotificationsProvider>();
     List<String> appsToInstall = [];
@@ -607,7 +614,7 @@ class AppsProvider with ChangeNotifier {
       MapEntry<String, String>? apkUrl;
       var trackOnly = apps[id]!.app.additionalSettings['trackOnly'] == true;
       if (!trackOnly) {
-        apkUrl = await confirmApkUrl(apps[id]!.app, context);
+        apkUrl = await confirmApkUrl(apps[id]!.app, getContext);
       }
       if (apkUrl != null) {
         int urlInd = apps[id]!
@@ -717,7 +724,9 @@ class AppsProvider with ChangeNotifier {
       try {
         return await pm.getPackageInfo(packageName: packageName);
       } catch (e) {
-        print(e); // OK
+        if (kDebugMode) {
+          print(e);
+        } // OK
       }
     }
     return null;
@@ -964,7 +973,7 @@ class AppsProvider with ChangeNotifier {
   }
 
   Future<void> removeApps(List<String> appIds) async {
-    var apkFiles = APKDir.listSync();
+    var apkFiles = appPackageDir.listSync();
     for (var appId in appIds) {
       File file = File('${(await getAppsDir()).path}/$appId.json');
       if (file.existsSync()) {
@@ -1588,7 +1597,7 @@ Future<void> bgUpdateCheck(int taskId, Map<String, dynamic>? params) async {
       try {
         logs.add(
             'BG install task $taskId: Attempting to update $appId in the background.');
-        await appsProvider.downloadAndInstallLatestApps([appId], null,
+        await appsProvider.downloadAndInstallLatestApps([appId], () => null,
             notificationsProvider: notificationsProvider);
         await Future.delayed(const Duration(
             seconds:

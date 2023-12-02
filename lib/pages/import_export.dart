@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:obtainium/components/custom_app_bar.dart';
@@ -12,7 +13,6 @@ import 'package:obtainium/providers/apps_provider.dart';
 import 'package:obtainium/providers/settings_provider.dart';
 import 'package:obtainium/providers/source_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ImportExportPage extends StatefulWidget {
@@ -305,170 +305,170 @@ class _ImportExportPageState extends State<ImportExportPage> {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
               SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: CustomAppBar(title: tr('importExport')),
               ),
             ];
           },
-          body: Builder(
-            builder: (context) {
-              return CustomScrollView(slivers: <Widget>[
-                SliverOverlapInjector(
-                  handle:
-                  NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  sliver: SliverList.list(
-                    children: [
-                      FutureBuilder(
-                        future: settingsProvider.getExportDir(),
-                        builder: (context, snapshot) {
-                          return Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
+          body: Builder(builder: (context) {
+            return CustomScrollView(slivers: <Widget>[
+              SliverOverlapInjector(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              SliverPadding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                sliver: SliverList.list(
+                  children: [
+                    FutureBuilder(
+                      future: settingsProvider.getExportDir(),
+                      builder: (context, snapshot) {
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextButton(
+                                    style: outlineButtonStyle,
+                                    onPressed: appsProvider.apps.isEmpty ||
+                                            importInProgress
+                                        ? null
+                                        : () {
+                                            runObtainiumExport(pickOnly: true);
+                                          },
+                                    child: Text(tr('pickExportDir')),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 16,
+                                ),
+                                Expanded(
+                                  child: TextButton(
+                                    style: outlineButtonStyle,
+                                    onPressed: appsProvider.apps.isEmpty ||
+                                            importInProgress ||
+                                            snapshot.data == null
+                                        ? null
+                                        : runObtainiumExport,
+                                    child: Text(tr('obtainiumExport')),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
                                     child: TextButton(
-                                      style: outlineButtonStyle,
-                                      onPressed: appsProvider.apps.isEmpty ||
-                                              importInProgress
+                                        style: outlineButtonStyle,
+                                        onPressed: importInProgress
+                                            ? null
+                                            : runObtainiumImport,
+                                        child: Text(tr('obtainiumImport')))),
+                              ],
+                            ),
+                            if (snapshot.data != null)
+                              Column(
+                                children: [
+                                  const SizedBox(height: 16),
+                                  GeneratedForm(
+                                      items: [
+                                        [
+                                          GeneratedFormSwitch(
+                                            'autoExportOnChanges',
+                                            label: tr('autoExportOnChanges'),
+                                            defaultValue: settingsProvider
+                                                .autoExportOnChanges,
+                                          )
+                                        ]
+                                      ],
+                                      onValueChanges:
+                                          (value, valid, isBuilding) {
+                                        if (valid && !isBuilding) {
+                                          if (value['autoExportOnChanges'] !=
+                                              null) {
+                                            settingsProvider
+                                                    .autoExportOnChanges =
+                                                value['autoExportOnChanges'] ==
+                                                    true;
+                                          }
+                                        }
+                                      }),
+                                ],
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                    if (importInProgress)
+                      const Column(
+                        children: [
+                          SizedBox(
+                            height: 14,
+                          ),
+                          LinearProgressIndicator(),
+                          SizedBox(
+                            height: 14,
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                          const Divider(
+                            height: 32,
+                          ),
+                          TextButton(
+                              onPressed:
+                                  importInProgress ? null : urlListImport,
+                              child: Text(
+                                tr('importFromURLList'),
+                              )),
+                          const SizedBox(height: 8),
+                          TextButton(
+                              onPressed: importInProgress ? null : runUrlImport,
+                              child: Text(
+                                tr('importFromURLsInFile'),
+                              )),
+                        ],
+                      ),
+                    ...sourceProvider.sources
+                        .where((element) => element.canSearch)
+                        .map((source) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                      onPressed: importInProgress
                                           ? null
                                           : () {
-                                              runObtainiumExport(pickOnly: true);
+                                              runSourceSearch(source);
                                             },
-                                      child: Text(tr('pickExportDir')),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 16,
-                                  ),
-                                  Expanded(
-                                    child: TextButton(
-                                      style: outlineButtonStyle,
-                                      onPressed: appsProvider.apps.isEmpty ||
-                                              importInProgress ||
-                                              snapshot.data == null
-                                          ? null
-                                          : runObtainiumExport,
-                                      child: Text(tr('obtainiumExport')),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: TextButton(
-                                          style: outlineButtonStyle,
-                                          onPressed: importInProgress
-                                              ? null
-                                              : runObtainiumImport,
-                                          child: Text(tr('obtainiumImport')))),
-                                ],
-                              ),
-                              if (snapshot.data != null)
-                                Column(
-                                  children: [
-                                    const SizedBox(height: 16),
-                                    GeneratedForm(
-                                        items: [
-                                          [
-                                            GeneratedFormSwitch(
-                                              'autoExportOnChanges',
-                                              label: tr('autoExportOnChanges'),
-                                              defaultValue: settingsProvider
-                                                  .autoExportOnChanges,
-                                            )
-                                          ]
-                                        ],
-                                        onValueChanges: (value, valid, isBuilding) {
-                                          if (valid && !isBuilding) {
-                                            if (value['autoExportOnChanges'] !=
-                                                null) {
-                                              settingsProvider.autoExportOnChanges =
-                                                  value['autoExportOnChanges'] ==
-                                                      true;
-                                            }
-                                          }
-                                        }),
-                                  ],
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                      if (importInProgress)
-                        const Column(
-                          children: [
-                            SizedBox(
-                              height: 14,
-                            ),
-                            LinearProgressIndicator(),
-                            SizedBox(
-                              height: 14,
-                            ),
-                          ],
-                        )
-                      else
-                        Column(
-                          children: [
-                            const Divider(
-                              height: 32,
-                            ),
-                            TextButton(
-                                onPressed: importInProgress ? null : urlListImport,
-                                child: Text(
-                                  tr('importFromURLList'),
-                                )),
-                            const SizedBox(height: 8),
-                            TextButton(
-                                onPressed: importInProgress ? null : runUrlImport,
-                                child: Text(
-                                  tr('importFromURLsInFile'),
-                                )),
-                          ],
-                        ),
-                      ...sourceProvider.sources
-                          .where((element) => element.canSearch)
-                          .map((source) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    const SizedBox(height: 8),
-                                    TextButton(
-                                        onPressed: importInProgress
-                                            ? null
-                                            : () {
-                                                runSourceSearch(source);
-                                              },
-                                        child: Text(
-                                            tr('searchX', args: [source.name])))
-                                  ]))
-                          .toList(),
-                      ...sourceProvider.massUrlSources
-                          .map((source) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    const SizedBox(height: 8),
-                                    TextButton(
-                                        onPressed: importInProgress
-                                            ? null
-                                            : () {
-                                                runMassSourceImport(source);
-                                              },
-                                        child: Text(
-                                            tr('importX', args: [source.name])))
-                                  ]))
-                          .toList(),
-                    ],
-                  ),
-                )
-              ]);
-            }
-          ),
+                                      child: Text(
+                                          tr('searchX', args: [source.name])))
+                                ])),
+                    ...sourceProvider.massUrlSources.map((source) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 8),
+                              TextButton(
+                                  onPressed: importInProgress
+                                      ? null
+                                      : () {
+                                          runMassSourceImport(source);
+                                        },
+                                  child:
+                                      Text(tr('importX', args: [source.name])))
+                            ])),
+                  ],
+                ),
+              )
+            ]);
+          }),
         ),
         persistentFooterButtons: [
           Center(
@@ -525,7 +525,7 @@ class _ImportErrorDialogState extends State<ImportErrorDialog> {
                   style: const TextStyle(fontStyle: FontStyle.italic),
                 )
               ]);
-        }).toList()
+        })
       ]),
       actions: [
         TextButton(

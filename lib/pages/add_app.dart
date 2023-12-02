@@ -136,7 +136,8 @@ class _AddAppPageState extends State<AddAppPage> {
               null));
     }
 
-    addApp({bool resetUserInputAfter = false}) async {
+    addApp(Function(dynamic e) onError,
+        {bool resetUserInputAfter = false}) async {
       setState(() {
         gettingAppInfo = true;
       });
@@ -155,7 +156,7 @@ class _AddAppPageState extends State<AddAppPage> {
           // Only download the APK here if you need to for the package ID
           if (isTempId(app) && app.additionalSettings['trackOnly'] != true) {
             // ignore: use_build_context_synchronously
-            var apkUrl = await appsProvider.confirmApkUrl(app, context);
+            var apkUrl = await appsProvider.confirmApkUrl(app, () => context);
             if (apkUrl == null) {
               throw ObtainiumError(tr('cancelled'));
             }
@@ -190,7 +191,7 @@ class _AddAppPageState extends State<AddAppPage> {
               MaterialPageRoute(builder: (context) => AppPage(appId: app!.id)));
         }
       } catch (e) {
-        showError(e, context);
+        onError(e);
       } finally {
         setState(() {
           gettingAppInfo = false;
@@ -248,13 +249,15 @@ class _AddAppPageState extends State<AddAppPage> {
                         ? null
                         : () {
                             HapticFeedback.selectionClick();
-                            addApp();
+                            addApp((e) {
+                              showError(e, context);
+                            });
                           },
                     child: Text(tr('add')))
           ],
         );
 
-    runSearch() async {
+    runSearch(Function(dynamic e) onError) async {
       setState(() {
         searching = true;
       });
@@ -307,7 +310,7 @@ class _AddAppPageState extends State<AddAppPage> {
           changeUserInput(selectedUrls[0], true, false, isSearch: true);
         }
       } catch (e) {
-        showError(e, context);
+        onError(e);
       } finally {
         setState(() {
           searching = false;
@@ -389,7 +392,9 @@ class _AddAppPageState extends State<AddAppPage> {
                     onPressed: searchQuery.isEmpty || doingSomething
                         ? null
                         : () {
-                            runSearch();
+                            runSearch((e) {
+                              showError(e, context);
+                            });
                           },
                     child: Text(tr('search')))
           ],
@@ -470,23 +475,21 @@ class _AddAppPageState extends State<AddAppPage> {
               const SizedBox(
                 height: 16,
               ),
-              ...sourceProvider.sources
-                  .map((e) => GestureDetector(
-                      onTap: e.host != null
-                          ? () {
-                              launchUrlString('https://${e.host}',
-                                  mode: LaunchMode.externalApplication);
-                            }
-                          : null,
-                      child: Text(
-                        '${e.name}${e.enforceTrackOnly ? ' ${tr('trackOnlyInBrackets')}' : ''}${e.canSearch ? ' ${tr('searchableInBrackets')}' : ''}',
-                        style: TextStyle(
-                            decoration: e.host != null
-                                ? TextDecoration.underline
-                                : TextDecoration.none,
-                            fontStyle: FontStyle.italic),
-                      )))
-                  .toList()
+              ...sourceProvider.sources.map((e) => GestureDetector(
+                  onTap: e.host != null
+                      ? () {
+                          launchUrlString('https://${e.host}',
+                              mode: LaunchMode.externalApplication);
+                        }
+                      : null,
+                  child: Text(
+                    '${e.name}${e.enforceTrackOnly ? ' ${tr('trackOnlyInBrackets')}' : ''}${e.canSearch ? ' ${tr('searchableInBrackets')}' : ''}',
+                    style: TextStyle(
+                        decoration: e.host != null
+                            ? TextDecoration.underline
+                            : TextDecoration.none,
+                        fontStyle: FontStyle.italic),
+                  )))
             ]);
 
     return Scaffold(
@@ -495,64 +498,65 @@ class _AddAppPageState extends State<AddAppPage> {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
               SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: CustomAppBar(title: tr('addApp')),
               ),
             ];
           },
-          body: Builder(
-            builder: (context) {
-              return CustomScrollView(shrinkWrap: true, slivers: <Widget>[
-                SliverOverlapInjector(
-                  handle:
-                  NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            getUrlInputRow(),
-                            const SizedBox(
-                              height: 16,
+          body: Builder(builder: (context) {
+            return CustomScrollView(shrinkWrap: true, slivers: <Widget>[
+              SliverOverlapInjector(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          getUrlInputRow(),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          if (pickedSourceOverride != null ||
+                              (pickedSource != null &&
+                                  pickedSource.runtimeType.toString() ==
+                                      HTML().runtimeType.toString()))
+                            getHTMLSourceOverrideDropdown(),
+                          if (shouldShowSearchBar()) getSearchBarRow(),
+                          if (pickedSource != null)
+                            FutureBuilder(
+                                builder: (ctx, val) {
+                                  return val.data != null &&
+                                          val.data!.isNotEmpty
+                                      ? Text(
+                                          val.data!,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        )
+                                      : const SizedBox();
+                                },
+                                future: pickedSource?.getSourceNote()),
+                          SizedBox(
+                            height: pickedSource != null ? 16 : 96,
+                          ),
+                          if (pickedSource != null) getAdditionalOptsCol(),
+                          if (pickedSource == null)
+                            const Divider(
+                              height: 48,
                             ),
-                            if (pickedSourceOverride != null ||
-                                (pickedSource != null &&
-                                    pickedSource.runtimeType.toString() ==
-                                        HTML().runtimeType.toString()))
-                              getHTMLSourceOverrideDropdown(),
-                            if (shouldShowSearchBar()) getSearchBarRow(),
-                            if (pickedSource != null)
-                              FutureBuilder(
-                                  builder: (ctx, val) {
-                                    return val.data != null && val.data!.isNotEmpty
-                                        ? Text(
-                                            val.data!,
-                                            style:
-                                                Theme.of(context).textTheme.bodySmall,
-                                          )
-                                        : const SizedBox();
-                                  },
-                                  future: pickedSource?.getSourceNote()),
-                            SizedBox(
-                              height: pickedSource != null ? 16 : 96,
-                            ),
-                            if (pickedSource != null) getAdditionalOptsCol(),
-                            if (pickedSource == null)
-                              const Divider(
-                                height: 48,
-                              ),
-                            if (pickedSource == null) getSourcesListWidget(),
-                            SizedBox(
-                              height: pickedSource != null ? 8 : 2,
-                            ),
-                          ])),
-                )
-              ]);
-            }
-          ),
+                          if (pickedSource == null) getSourcesListWidget(),
+                          SizedBox(
+                            height: pickedSource != null ? 8 : 2,
+                          ),
+                        ])),
+              )
+            ]);
+          }),
         ));
   }
 }

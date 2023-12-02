@@ -87,7 +87,8 @@ class _HomePageState extends State<HomePage> {
     prevAppCount = appsProvider.apps.length;
     prevIsLoading = appsProvider.loadingApps;
 
-    return WillPopScope(
+    return PopScope(
+        canPop: false,
         child: Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: PageTransitionSwitcher(
@@ -128,7 +129,10 @@ class _HomePageState extends State<HomePage> {
                 selectedIndexHistory.isEmpty ? 0 : selectedIndexHistory.last,
           ),
         ),
-        onWillPop: () async {
+        onPopInvoked: (bool didPop) async {
+          if (didPop) {
+            return;
+          }
           setIsReversing(selectedIndexHistory.length >= 2
               ? selectedIndexHistory.reversed.toList()[1]
               : 0);
@@ -136,11 +140,14 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               selectedIndexHistory.removeLast();
             });
-            return false;
+            return;
           }
-          return !(pages[0].widget.key as GlobalKey<AppsPageState>)
+          bool flag = !(pages[0].widget.key as GlobalKey<AppsPageState>)
               .currentState
               ?.clearSelected();
+          if (flag) {
+            Navigator.of(context).pop();
+          }
         });
   }
 }

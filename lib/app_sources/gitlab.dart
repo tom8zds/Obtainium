@@ -1,14 +1,14 @@
 import 'dart:convert';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
 import 'package:obtainium/app_sources/github.dart';
+import 'package:obtainium/components/generated_form.dart';
 import 'package:obtainium/custom_errors.dart';
 import 'package:obtainium/providers/settings_provider.dart';
 import 'package:obtainium/providers/source_provider.dart';
-import 'package:obtainium/components/generated_form.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class GitLab extends AppSource {
@@ -80,12 +80,12 @@ class GitLab extends AppSource {
   @override
   Future<Map<String, List<String>>> search(String query,
       {Map<String, dynamic> querySettings = const {}}) async {
-    String? PAT = await getPATIfAny({});
-    if (PAT == null) {
+    String? accessToken = await getPATIfAny({});
+    if (accessToken == null) {
       throw CredsNeededError(name);
     }
     var url =
-        'https://$host/api/v4/search?private_token=$PAT&scope=projects&search=${Uri.encodeQueryComponent(query)}';
+        'https://$host/api/v4/search?private_token=$accessToken&scope=projects&search=${Uri.encodeQueryComponent(query)}';
     var res = await sourceRequest(url);
     if (res.statusCode != 200) {
       throw getObtainiumHttpError(res);
@@ -112,12 +112,12 @@ class GitLab extends AppSource {
   ) async {
     bool fallbackToOlderReleases =
         additionalSettings['fallbackToOlderReleases'] == true;
-    String? PAT = await getPATIfAny(hostChanged ? additionalSettings : {});
+    String? accessToken = await getPATIfAny(hostChanged ? additionalSettings : {});
     Iterable<APKDetails> apkDetailsList = [];
-    if (PAT != null) {
+    if (accessToken != null) {
       var names = GitHub().getAppNames(standardUrl);
       Response res = await sourceRequest(
-          'https://$host/api/v4/projects/${names.author}%2F${names.name}/releases?private_token=$PAT');
+          'https://$host/api/v4/projects/${names.author}%2F${names.name}/releases?private_token=$accessToken');
       if (res.statusCode != 200) {
         throw getObtainiumHttpError(res);
       }
@@ -174,7 +174,6 @@ class GitLab extends AppSource {
           ...getLinksFromParsedHTML(entryContent,
                   RegExp('/[^/]+\\.apk\$', caseSensitive: false), '')
               .where((element) => Uri.parse(element).host != '')
-              .toList()
         ];
         var entryId = entry.querySelector('id')?.innerHtml;
         var version =
