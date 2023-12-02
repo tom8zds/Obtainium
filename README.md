@@ -1,3 +1,9 @@
+# Obtainiumi
+
+A fork of Obtainium for Xiaomi device
+
+Original README under
+
 # ![Obtainium Icon](./assets/graphics/icon_small.png) Obtainium
 
 Get Android App Updates Directly From the Source.

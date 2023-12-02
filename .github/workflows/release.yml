@@ -12,36 +12,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
 
-      - name: Import GPG key
-        id: import_pgp_key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.PGP_KEY_BASE64 }}
-          passphrase: ${{ secrets.PGP_PASSPHRASE }}
-
       - name: Build APKs
         run: |
-          sed -i 's/signingConfig signingConfigs.release//g' android/app/build.gradle
           flutter build apk && flutter build apk --split-per-abi
-          rm ./build/app/outputs/flutter-apk/*.sha1
           ls -l ./build/app/outputs/flutter-apk/
-        
-      - name: Sign APKs
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-        run: |
-          echo "${KEYSTORE_BASE64}" | base64 -d > apksign.keystore
-          for apk in ./build/app/outputs/flutter-apk/*-release*.apk; do
-            unsignedFn=${apk/-release/-unsigned}
-            mv "$apk" "$unsignedFn"
-            ${ANDROID_HOME}/build-tools/30.0.2/apksigner sign --ks apksign.keystore --ks-pass pass:"${KEYSTORE_PASSWORD}" --out "${apk}" "${unsignedFn}"
-            sha256sum ${apk} | cut -d " " -f 1 > "$apk".sha256
-            gpg --batch  --pinentry-mode loopback --passphrase "${PGP_PASSPHRASE}" --sign --detach-sig "$apk".sha256
-          done
-          rm apksign.keystore
-          PGP_KEY_FINGERPRINT="${{ steps.import_pgp_key.outputs.fingerprint }}"
         
       - name: Extract Version
         id: extract_version      

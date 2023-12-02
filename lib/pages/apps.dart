@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:obtainium/components/custom_app_bar.dart';
-import 'package:obtainium/components/generated_form.dart';
-import 'package:obtainium/components/generated_form_modal.dart';
-import 'package:obtainium/custom_errors.dart';
-import 'package:obtainium/main.dart';
-import 'package:obtainium/pages/app.dart';
-import 'package:obtainium/pages/settings.dart';
-import 'package:obtainium/providers/apps_provider.dart';
-import 'package:obtainium/providers/settings_provider.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/components/custom_app_bar.dart';
+import 'package:obtainiumi/components/generated_form.dart';
+import 'package:obtainiumi/components/generated_form_modal.dart';
+import 'package:obtainiumi/custom_errors.dart';
+import 'package:obtainiumi/main.dart';
+import 'package:obtainiumi/pages/app.dart';
+import 'package:obtainiumi/pages/settings.dart';
+import 'package:obtainiumi/providers/apps_provider.dart';
+import 'package:obtainiumi/providers/settings_provider.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -380,7 +380,7 @@ class AppsPageState extends State<AppsPage> {
             : () {
                 appsProvider.downloadAndInstallLatestApps(
                     [listedApps[appIndex].app.id],
-                        () => globalNavigatorKey.currentContext).catchError((e) {
+                    () => globalNavigatorKey.currentContext).catchError((e) {
                   showError(e, context);
                   return <String>[];
                 });

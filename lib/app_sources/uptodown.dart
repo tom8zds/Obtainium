@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:html/parser.dart';
-import 'package:obtainium/app_sources/apkpure.dart';
-import 'package:obtainium/custom_errors.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/app_sources/apkpure.dart';
+import 'package:obtainiumi/custom_errors.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 
 class Uptodown extends AppSource {
   Uptodown() {

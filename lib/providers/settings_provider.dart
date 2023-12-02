@@ -5,17 +5,17 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:obtainium/app_sources/github.dart';
-import 'package:obtainium/main.dart';
-import 'package:obtainium/providers/apps_provider.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/app_sources/github.dart';
+import 'package:obtainiumi/main.dart';
+import 'package:obtainiumi/providers/apps_provider.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_storage/shared_storage.dart' as saf;
 
 String obtainiumTempId = 'imranr98_obtainium_${GitHub().host}';
-String obtainiumId = 'dev.imranr.obtainium';
+String obtainiumId = 'dev.tomzds9.obtainiumi';
 
 enum ThemeSettings { system, light, dark }
 
@@ -40,7 +40,7 @@ class SettingsProvider with ChangeNotifier {
   String? defaultAppDir;
   bool justStarted = true;
 
-  String sourceUrl = 'https://github.com/ImranR98/Obtainium';
+  String sourceUrl = 'https://github.com/tom8zds/Obtainium';
 
   // Not done in constructor as we want to be able to await it
   Future<void> initializeSettings() async {

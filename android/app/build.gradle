@@ -49,7 +49,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "dev.imranr.obtainium"
+        applicationId "dev.tomzds9.obtainiumi"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 23

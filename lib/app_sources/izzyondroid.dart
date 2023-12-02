@@ -1,6 +1,6 @@
-import 'package:obtainium/app_sources/fdroid.dart';
-import 'package:obtainium/custom_errors.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/app_sources/fdroid.dart';
+import 'package:obtainiumi/custom_errors.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 
 class IzzyOnDroid extends AppSource {
   late FDroid fd;

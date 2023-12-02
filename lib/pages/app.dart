@@ -1,14 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:obtainium/components/generated_form.dart';
-import 'package:obtainium/components/generated_form_modal.dart';
-import 'package:obtainium/custom_errors.dart';
-import 'package:obtainium/main.dart';
-import 'package:obtainium/pages/settings.dart';
-import 'package:obtainium/providers/apps_provider.dart';
-import 'package:obtainium/providers/settings_provider.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/components/generated_form.dart';
+import 'package:obtainiumi/components/generated_form_modal.dart';
+import 'package:obtainiumi/custom_errors.dart';
+import 'package:obtainiumi/main.dart';
+import 'package:obtainiumi/pages/settings.dart';
+import 'package:obtainiumi/providers/apps_provider.dart';
+import 'package:obtainiumi/providers/settings_provider.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -407,7 +407,7 @@ class _AppPageState extends State<AppPage> {
                   HapticFeedback.heavyImpact();
                   var res = await appsProvider.downloadAndInstallLatestApps(
                     app?.app.id != null ? [app!.app.id] : [],
-                        () => globalNavigatorKey.currentContext,
+                    () => globalNavigatorKey.currentContext,
                   );
                   if (app?.app.installedVersion != null && !trackOnly) {
                     // ignore: use_build_context_synchronously

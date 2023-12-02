@@ -3,7 +3,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 
 class ObtainiumNotification {
   late int id;
@@ -196,7 +196,7 @@ class NotificationsProvider {
                 channelDescription: channelDescription,
                 importance: importance,
                 priority: importanceToPriority[importance]!,
-                groupKey: 'dev.imranr.obtainium.$channelCode',
+                groupKey: 'dev.tomzds9.obtainiumi.$channelCode',
                 progress: progPercent ?? 0,
                 maxProgress: 100,
                 showProgress: progPercent != null,

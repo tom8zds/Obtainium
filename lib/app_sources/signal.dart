@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart';
-import 'package:obtainium/custom_errors.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/custom_errors.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 
 class Signal extends AppSource {
   Signal() {

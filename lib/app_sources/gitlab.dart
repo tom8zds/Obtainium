@@ -4,11 +4,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
-import 'package:obtainium/app_sources/github.dart';
-import 'package:obtainium/components/generated_form.dart';
-import 'package:obtainium/custom_errors.dart';
-import 'package:obtainium/providers/settings_provider.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/app_sources/github.dart';
+import 'package:obtainiumi/components/generated_form.dart';
+import 'package:obtainiumi/custom_errors.dart';
+import 'package:obtainiumi/providers/settings_provider.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class GitLab extends AppSource {
@@ -112,7 +112,8 @@ class GitLab extends AppSource {
   ) async {
     bool fallbackToOlderReleases =
         additionalSettings['fallbackToOlderReleases'] == true;
-    String? accessToken = await getPATIfAny(hostChanged ? additionalSettings : {});
+    String? accessToken =
+        await getPATIfAny(hostChanged ? additionalSettings : {});
     Iterable<APKDetails> apkDetailsList = [];
     if (accessToken != null) {
       var names = GitHub().getAppNames(standardUrl);

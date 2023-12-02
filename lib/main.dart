@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:obtainium/pages/home.dart';
-import 'package:obtainium/providers/apps_provider.dart';
-import 'package:obtainium/providers/logs_provider.dart';
-import 'package:obtainium/providers/notifications_provider.dart';
-import 'package:obtainium/providers/settings_provider.dart';
-import 'package:obtainium/providers/source_provider.dart';
+import 'package:obtainiumi/pages/home.dart';
+import 'package:obtainiumi/providers/apps_provider.dart';
+import 'package:obtainiumi/providers/logs_provider.dart';
+import 'package:obtainiumi/providers/notifications_provider.dart';
+import 'package:obtainiumi/providers/settings_provider.dart';
+import 'package:obtainiumi/providers/source_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -137,9 +137,9 @@ class _ObtainiumState extends State<Obtainium> {
         appsProvider.saveApps([
           App(
               obtainiumId,
-              'https://github.com/ImranR98/Obtainium',
-              'ImranR98',
-              'Obtainium',
+              'https://github.com/tom8zds/Obtainium',
+              'tom8zds',
+              'Obtainiumi',
               currentReleaseTag,
               currentReleaseTag,
               [],
@@ -207,7 +207,7 @@ class _ObtainiumState extends State<Obtainium> {
       }
 
       return MaterialApp(
-          title: 'Obtainium',
+          title: 'Obtainiumi',
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
