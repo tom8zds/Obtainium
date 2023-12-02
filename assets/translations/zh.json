@@ -263,9 +263,9 @@
     "debugMenu": "调试选项",
     "bgTaskStarted": "后台任务已启动 - 详见日志",
     "runBgCheckNow": "立即进行后台更新检查",
-    "versionExtractWholePage": "Apply Version Extraction Regex to Entire Page",
-    "installing": "Installing",
-    "skipUpdateNotifications": "Skip update notifications",
+    "versionExtractWholePage": "将版本正则匹配应用到当前页",
+    "installing": "正在安装",
+    "skipUpdateNotifications": "跳过更新通知",
     "updatesAvailableNotifChannel": "更新可用",
     "appsUpdatedNotifChannel": "应用已更新",
     "appsPossiblyUpdatedNotifChannel": "已尝试更新应用",
@@ -274,7 +274,7 @@
     "downloadingXNotifChannel": "正在下载{}",
     "completeAppInstallationNotifChannel": "完成应用安装",
     "checkingForUpdatesNotifChannel": "正在检查更新",
-    "onlyCheckInstalledOrTrackOnlyApps": "Only check installed and Track-Only apps for updates",
+    "onlyCheckInstalledOrTrackOnlyApps": "仅对已安装和已跟踪的应用检查更新",
     "removeAppQuestion": {
         "one": "是否删除应用？",
         "other": "是否删除应用？"
