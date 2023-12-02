@@ -491,51 +491,68 @@ class _AddAppPageState extends State<AddAppPage> {
 
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: CustomScrollView(shrinkWrap: true, slivers: <Widget>[
-          CustomAppBar(title: tr('addApp')),
-          SliverToBoxAdapter(
-            child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      getUrlInputRow(),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      if (pickedSourceOverride != null ||
-                          (pickedSource != null &&
-                              pickedSource.runtimeType.toString() ==
-                                  HTML().runtimeType.toString()))
-                        getHTMLSourceOverrideDropdown(),
-                      if (shouldShowSearchBar()) getSearchBarRow(),
-                      if (pickedSource != null)
-                        FutureBuilder(
-                            builder: (ctx, val) {
-                              return val.data != null && val.data!.isNotEmpty
-                                  ? Text(
-                                      val.data!,
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    )
-                                  : const SizedBox();
-                            },
-                            future: pickedSource?.getSourceNote()),
-                      SizedBox(
-                        height: pickedSource != null ? 16 : 96,
-                      ),
-                      if (pickedSource != null) getAdditionalOptsCol(),
-                      if (pickedSource == null)
-                        const Divider(
-                          height: 48,
-                        ),
-                      if (pickedSource == null) getSourcesListWidget(),
-                      SizedBox(
-                        height: pickedSource != null ? 8 : 2,
-                      ),
-                    ])),
-          )
-        ]));
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return [
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: CustomAppBar(title: tr('addApp')),
+              ),
+            ];
+          },
+          body: Builder(
+            builder: (context) {
+              return CustomScrollView(shrinkWrap: true, slivers: <Widget>[
+                SliverOverlapInjector(
+                  handle:
+                  NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            getUrlInputRow(),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            if (pickedSourceOverride != null ||
+                                (pickedSource != null &&
+                                    pickedSource.runtimeType.toString() ==
+                                        HTML().runtimeType.toString()))
+                              getHTMLSourceOverrideDropdown(),
+                            if (shouldShowSearchBar()) getSearchBarRow(),
+                            if (pickedSource != null)
+                              FutureBuilder(
+                                  builder: (ctx, val) {
+                                    return val.data != null && val.data!.isNotEmpty
+                                        ? Text(
+                                            val.data!,
+                                            style:
+                                                Theme.of(context).textTheme.bodySmall,
+                                          )
+                                        : const SizedBox();
+                                  },
+                                  future: pickedSource?.getSourceNote()),
+                            SizedBox(
+                              height: pickedSource != null ? 16 : 96,
+                            ),
+                            if (pickedSource != null) getAdditionalOptsCol(),
+                            if (pickedSource == null)
+                              const Divider(
+                                height: 48,
+                              ),
+                            if (pickedSource == null) getSourcesListWidget(),
+                            SizedBox(
+                              height: pickedSource != null ? 8 : 2,
+                            ),
+                          ])),
+                )
+              ]);
+            }
+          ),
+        ));
   }
 }

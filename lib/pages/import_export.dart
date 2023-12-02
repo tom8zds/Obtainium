@@ -301,18 +301,24 @@ class _ImportExportPageState extends State<ImportExportPage> {
 
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: Stack(
-          children: [
-            NestedScrollView(
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                return [
-                  CustomAppBar(title: tr('importExport')),
-                ];
-              },
-              body: CustomScrollView(slivers: <Widget>[
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return [
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: CustomAppBar(title: tr('importExport')),
+              ),
+            ];
+          },
+          body: Builder(
+            builder: (context) {
+              return CustomScrollView(slivers: <Widget>[
+                SliverOverlapInjector(
+                  handle:
+                  NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                ),
                 SliverPadding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   sliver: SliverList.list(
                     children: [
                       FutureBuilder(
@@ -379,13 +385,11 @@ class _ImportExportPageState extends State<ImportExportPage> {
                                             )
                                           ]
                                         ],
-                                        onValueChanges:
-                                            (value, valid, isBuilding) {
+                                        onValueChanges: (value, valid, isBuilding) {
                                           if (valid && !isBuilding) {
                                             if (value['autoExportOnChanges'] !=
                                                 null) {
-                                              settingsProvider
-                                                      .autoExportOnChanges =
+                                              settingsProvider.autoExportOnChanges =
                                                   value['autoExportOnChanges'] ==
                                                       true;
                                             }
@@ -416,8 +420,7 @@ class _ImportExportPageState extends State<ImportExportPage> {
                               height: 32,
                             ),
                             TextButton(
-                                onPressed:
-                                    importInProgress ? null : urlListImport,
+                                onPressed: importInProgress ? null : urlListImport,
                                 child: Text(
                                   tr('importFromURLList'),
                                 )),
@@ -463,32 +466,18 @@ class _ImportExportPageState extends State<ImportExportPage> {
                     ],
                   ),
                 )
-              ]),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                height: kToolbarHeight,
-                child: Column(
-                  children: [
-                    const Divider(
-                      height: 2,
-                    ),
-                    const Spacer(),
-                    Text(tr('importedAppsIdDisclaimer'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontStyle: FontStyle.italic, fontSize: 12)),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ));
+              ]);
+            }
+          ),
+        ),
+        persistentFooterButtons: [
+          Center(
+            child: Text(tr('importedAppsIdDisclaimer'),
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontStyle: FontStyle.italic, fontSize: 12)),
+          ),
+        ]);
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -1058,14 +1059,30 @@ class AppsPageState extends State<AppsPage> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: RefreshIndicator(
-          key: _refreshIndicatorKey,
-          onRefresh: refresh,
-          child: CustomScrollView(slivers: <Widget>[
-            CustomAppBar(title: tr('appsString')),
-            ...getLoadingWidgets(),
-            getDisplayedList()
-          ])),
+      body: NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return [
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              sliver: CustomAppBar(title: tr('appsString')),
+            ),
+          ];
+        },
+        body: Builder(builder: (context) {
+          return RefreshIndicator(
+              edgeOffset: kToolbarHeight,
+              key: _refreshIndicatorKey,
+              onRefresh: refresh,
+              child: CustomScrollView(slivers: <Widget>[
+                SliverOverlapInjector(
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                ),
+                ...getLoadingWidgets(),
+                getDisplayedList()
+              ]));
+        }),
+      ),
       persistentFooterButtons: appsProvider.apps.isEmpty
           ? null
           : [
