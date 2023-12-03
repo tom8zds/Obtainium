@@ -424,7 +424,7 @@ class _AppPageState extends State<AppPage> {
             : null,
         child: Text(
           app?.downloadProgress != null
-              ? tr('downloadingX', args: [" ${app!.downloadProgress! / 100} %"])
+              ? tr('downloadingX', args: [" ${(app!.downloadProgress! / 100).floor()} %"])
               : app?.app.installedVersion == null
                   ? !trackOnly
                       ? tr('install')
@@ -432,6 +432,9 @@ class _AppPageState extends State<AppPage> {
                   : !trackOnly
                       ? tr('update')
                       : tr('markUpdated'),
+          style: TextStyle(
+            color:  app?.downloadProgress != null ? Theme.of(context).colorScheme.onPrimary : null,
+          ),
         ));
 
     getBottomSheetMenu() => Row(
@@ -504,12 +507,14 @@ class _AppPageState extends State<AppPage> {
                               child: Center(
                                 child: SizedBox(
                                   height: 40,
-                                  child: LinearProgressIndicator(
-                                    minHeight: 40,
+                                  child: ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
-                                    value: app!.downloadProgress! >= 0
-                                        ? app.downloadProgress! / 100
-                                        : null,
+                                    child: LinearProgressIndicator(
+                                      minHeight: 40,
+                                      value: app!.downloadProgress! >= 0
+                                          ? app.downloadProgress! / 100
+                                          : null,
+                                    ),
                                   ),
                                 ),
                               ),
