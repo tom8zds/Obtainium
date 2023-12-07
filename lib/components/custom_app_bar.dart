@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatefulWidget {
-  const CustomAppBar({super.key, required this.title});
+  const CustomAppBar({super.key, required this.title, this.actions});
 
   final String title;
+  final List<Widget>? actions;
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
@@ -24,6 +25,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               TextStyle(color: Theme.of(context).textTheme.bodyMedium!.color),
         ),
       ),
+      actions: widget.actions,
     );
   }
 }
