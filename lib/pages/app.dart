@@ -399,43 +399,49 @@ class _AppPageState extends State<AppPage> {
         ));
 
     getInstallOrUpdateButton() => TextButton(
-        onPressed: (app?.app.installedVersion == null ||
-                    app?.app.installedVersion != app?.app.latestVersion) &&
-                !areDownloadsRunning
-            ? () async {
-                try {
-                  HapticFeedback.heavyImpact();
-                  var res = await appsProvider.downloadAndInstallLatestApps(
-                    app?.app.id != null ? [app!.app.id] : [],
-                    () => globalNavigatorKey.currentContext,
-                  );
-                  if (app?.app.installedVersion != null && !trackOnly) {
+          onPressed: (app?.app.installedVersion == null ||
+                      app?.app.installedVersion != app?.app.latestVersion) &&
+                  !areDownloadsRunning
+              ? () async {
+                  try {
+                    HapticFeedback.heavyImpact();
+                    var res = await appsProvider.downloadAndInstallLatestApps(
+                      app?.app.id != null ? [app!.app.id] : [],
+                      () => globalNavigatorKey.currentContext,
+                    );
+                    if (app?.app.installedVersion != null && !trackOnly) {
+                      // ignore: use_build_context_synchronously
+                      showMessage(tr('appsUpdated'), context);
+                    }
+                    if (res.isNotEmpty && mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  } catch (e) {
                     // ignore: use_build_context_synchronously
-                    showMessage(tr('appsUpdated'), context);
+                    showError(e, context);
                   }
-                  if (res.isNotEmpty && mounted) {
-                    Navigator.of(context).pop();
-                  }
-                } catch (e) {
-                  // ignore: use_build_context_synchronously
-                  showError(e, context);
                 }
-              }
-            : null,
-        child: Text(
-          app?.downloadProgress != null
-              ? tr('downloadingX', args: [" ${(app!.downloadProgress! / 100).floor()} %"])
-              : app?.app.installedVersion == null
-                  ? !trackOnly
-                      ? tr('install')
-                      : tr('markInstalled')
-                  : !trackOnly
-                      ? tr('update')
-                      : tr('markUpdated'),
-          style: TextStyle(
-            color:  app?.downloadProgress != null ? Theme.of(context).colorScheme.onPrimary : null,
+              : null,
+          child: Text(
+            app?.downloadProgress != null
+                ?  NumberFormat.decimalPercentPattern(decimalDigits: 2)
+                .format((app!.downloadProgress! / 100))
+                : app?.app.installedVersion == null
+                    ? !trackOnly
+                        ? tr('install')
+                        : tr('markInstalled')
+                    : !trackOnly
+                        ? tr('update')
+                        : tr('markUpdated'),
+            style: TextStyle(
+              color: app?.downloadProgress != null
+                  ? app!.downloadProgress! > 50
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface
+                  : null,
+            ),
           ),
-        ));
+        );
 
     getBottomSheetMenu() => Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
