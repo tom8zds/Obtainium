@@ -1063,7 +1063,36 @@ class AppsPageState extends State<AppsPage> {
           return [
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              sliver: CustomAppBar(title: tr('appsString')),
+              sliver: CustomAppBar(
+                title: tr('appsString'),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      switch (settingsProvider.theme) {
+                        case ThemeSettings.dark:
+                          settingsProvider.theme = ThemeSettings.system;
+                          break;
+                        case ThemeSettings.light:
+                          settingsProvider.theme = ThemeSettings.dark;
+                          break;
+                        case ThemeSettings.system:
+                          settingsProvider.theme = ThemeSettings.light;
+                          break;
+                        default:
+                          settingsProvider.theme = ThemeSettings.system;
+                          break;
+                      }
+                    },
+                    icon: Icon(
+                      settingsProvider.theme == ThemeSettings.system
+                          ? Icons.brightness_auto
+                          : settingsProvider.theme == ThemeSettings.dark
+                              ? Icons.brightness_3
+                              : Icons.brightness_5,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ];
         },
