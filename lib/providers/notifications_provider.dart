@@ -2,6 +2,7 @@
 // Contains a set of pre-defined ObtainiumNotification objects that should be used throughout the app
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:obtainiumi/providers/source_provider.dart';
 
@@ -111,7 +112,7 @@ class DownloadNotification extends ObtainiumNotification {
       : super(
             appName.hashCode,
             tr('downloadingX', args: [appName]),
-            '',
+            tr('percentProgress', args: [progPercent.toString()]),
             'APP_DOWNLOADING',
             tr('downloadingXNotifChannel', args: [tr('app')]),
             tr('downloadNotifDescription'),
@@ -147,6 +148,13 @@ class NotificationsProvider {
 
   bool isInitialized = false;
 
+  void Function(NotificationResponse)? _onDidReceiveNotificationResponse;
+
+  set onDidReceiveNotificationResponse(
+      void Function(NotificationResponse) callback) {
+    _onDidReceiveNotificationResponse = callback;
+  }
+
   Map<Importance, Priority> importanceToPriority = {
     Importance.defaultImportance: Priority.defaultPriority,
     Importance.high: Priority.high,
@@ -158,8 +166,17 @@ class NotificationsProvider {
   };
 
   Future<void> initialize() async {
-    isInitialized = await notifications.initialize(const InitializationSettings(
-            android: AndroidInitializationSettings('ic_notification'))) ??
+    isInitialized = await notifications.initialize(
+          const InitializationSettings(
+            android: AndroidInitializationSettings('ic_notification'),
+          ),
+          onDidReceiveNotificationResponse: (response) {
+            if (_onDidReceiveNotificationResponse != null) {
+              _onDidReceiveNotificationResponse!(response);
+            }
+          },
+          onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+        ) ??
         false;
   }
 
@@ -168,6 +185,52 @@ class NotificationsProvider {
       await initialize();
     }
     await notifications.cancel(id);
+  }
+
+  Future<void> notifyDownload(
+      int id,
+      String title,
+      String message,
+      String channelCode,
+      String channelName,
+      String channelDescription,
+      Importance importance,
+      {bool cancelExisting = false,
+      int? progPercent,
+      bool onlyAlertOnce = false}) async {
+    if (cancelExisting) {
+      await cancel(id);
+    }
+    if (!isInitialized) {
+      await initialize();
+    }
+    await notifications.show(
+      id,
+      title,
+      message,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelCode,
+          channelName,
+          channelDescription: channelDescription,
+          importance: importance,
+          priority: importanceToPriority[importance]!,
+          groupKey: 'dev.tomzds9.obtainiumi.$channelCode',
+          progress: progPercent ?? 0,
+          maxProgress: 100,
+          showProgress: progPercent != null,
+          onlyAlertOnce: onlyAlertOnce,
+          indeterminate: progPercent != null && progPercent < 0,
+          actions: [
+            AndroidNotificationAction(
+              'cancel',
+              tr('cancel'),
+              showsUserInterface: true,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> notifyRaw(
@@ -205,10 +268,30 @@ class NotificationsProvider {
   }
 
   Future<void> notify(ObtainiumNotification notif,
-          {bool cancelExisting = false}) =>
-      notifyRaw(notif.id, notif.title, notif.message, notif.channelCode,
+      {bool cancelExisting = false}) {
+    if (notif is DownloadNotification) {
+      return notifyDownload(
+          notif.id,
+          notif.title,
+          notif.message,
+          notif.channelCode,
+          notif.channelName,
+          notif.channelDescription,
+          notif.importance,
+          cancelExisting: cancelExisting,
+          onlyAlertOnce: notif.onlyAlertOnce,
+          progPercent: notif.progPercent);
+    } else {
+      return notifyRaw(notif.id, notif.title, notif.message, notif.channelCode,
           notif.channelName, notif.channelDescription, notif.importance,
           cancelExisting: cancelExisting,
           onlyAlertOnce: notif.onlyAlertOnce,
           progPercent: notif.progPercent);
+    }
+  }
+}
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  debugPrint("Notification Tapped ${notificationResponse.actionId}");
 }

@@ -14,6 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'test_page.dart';
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -614,6 +616,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           },
                           icon: const Icon(Icons.bug_report_outlined),
                           label: Text(tr('appLogs'))),
+                      TextButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const TestPage()));
+                          },
+                          icon: const Icon(Icons.bug_report_outlined),
+                          label: Text(tr('debugPage'))),
                     ],
                   ),
                   const Divider(

@@ -147,6 +147,7 @@ class AppsProvider with ChangeNotifier {
   // In memory App state (should always be kept in sync with local storage versions)
   Map<String, AppInMemory> apps = {};
   bool loadingApps = false;
+  bool cancelFlag = false;
   bool gettingUpdates = false;
   LogsProvider logs = LogsProvider();
 
@@ -197,6 +198,11 @@ class AppsProvider with ChangeNotifier {
     }();
   }
 
+  void cancelDownload() {
+    cancelFlag = true;
+    notifyListeners();
+  }
+
   Future<File> downloadFileWithRetry(
       String url, String fileNameNoExt, Function? onProgress,
       {bool useExisting = true,
@@ -206,6 +212,9 @@ class AppsProvider with ChangeNotifier {
       return await downloadFile(url, fileNameNoExt, onProgress,
           useExisting: useExisting, headers: headers);
     } catch (e) {
+      if(e is ObtainiumError){
+        rethrow;
+      }
       if (retries > 0 && e is ClientException) {
         await Future.delayed(const Duration(seconds: 5));
         return await downloadFileWithRetry(url, fileNameNoExt, onProgress,
@@ -249,6 +258,10 @@ class AppsProvider with ChangeNotifier {
         progress = (length != null ? received / length * 100 : 30);
         if (onProgress != null) {
           onProgress(progress);
+        }
+        if(cancelFlag){
+          cancelFlag = false;
+          throw DownloadCancelError();
         }
         return s;
       }).pipe(sink);
@@ -602,6 +615,15 @@ class AppsProvider with ChangeNotifier {
     BuildContext? context = getContext();
     notificationsProvider =
         notificationsProvider ?? context?.read<NotificationsProvider>();
+    if(notificationsProvider != null){
+      notificationsProvider.onDidReceiveNotificationResponse = (action) {
+        debugPrint("Notification Received ${action.actionId}");
+        if(action.actionId == "cancel") {
+          cancelFlag = true;
+        }
+      };
+    }
+
     List<String> appsToInstall = [];
     List<String> trackOnlyAppsToUpdate = [];
     // For all specified Apps, filter out those for which:

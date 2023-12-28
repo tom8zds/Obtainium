@@ -59,6 +59,10 @@ class InstallError extends ObtainiumError {
   InstallError(int code) : super(tr('someErrors'));
 }
 
+class DownloadCancelError extends ObtainiumError {
+  DownloadCancelError() : super(tr('cancelled'));
+}
+
 class IDChangedError extends ObtainiumError {
   IDChangedError(String newId) : super('${tr('appIdMismatch')} - $newId');
 }

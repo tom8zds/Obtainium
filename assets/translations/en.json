@@ -261,6 +261,7 @@
     "dontSortReleasesList": "Retain release order from API",
     "reverseSort": "Reverse sorting",
     "debugMenu": "Debug Menu",
+    "debugPage": "debug Page",
     "bgTaskStarted": "Background task started - check logs.",
     "runBgCheckNow": "Run Background Update Check Now",
     "versionExtractWholePage": "Apply Version Extraction Regex to Entire Page",
