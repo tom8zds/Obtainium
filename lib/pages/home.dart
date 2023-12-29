@@ -40,6 +40,8 @@ class _HomePageState extends State<HomePage> {
     NavigationPageItem(tr('settings'), Icons.settings, const SettingsPage())
   ];
 
+  DateTime? currentBackPressTime;
+
   @override
   Widget build(BuildContext context) {
     AppsProvider appsProvider = context.watch<AppsProvider>();
@@ -146,7 +148,14 @@ class _HomePageState extends State<HomePage> {
               .currentState
               ?.clearSelected();
           if (flag) {
-            Navigator.of(context).pop();
+            DateTime now = DateTime.now();
+            if (currentBackPressTime == null ||
+                now.difference(currentBackPressTime!) > const Duration(seconds: 2)) {
+              currentBackPressTime = now;
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("再次返回以退出应用")));
+              return;
+            }
+            SystemNavigator.pop();
           }
         });
   }
